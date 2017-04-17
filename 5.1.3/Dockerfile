@@ -32,9 +32,9 @@ RUN apt-get install -y build-essential \
   mysql-client \
   ssmtp
 
-RUN cd /tmp && wget https://www.apache.org/dist/httpd/httpd-2.2.31.tar.gz \
-  && tar xzvf httpd-2.2.31.tar.gz \
-  && /usr/local/apache2/bin/apxs -c -i /tmp/httpd-2.2.31/modules/mappers/mod_rewrite.c
+RUN cd /tmp && wget https://www.apache.org/dist/httpd/httpd-2.2.32.tar.gz \
+  && tar xzvf httpd-2.2.32.tar.gz \
+  && /usr/local/apache2/bin/apxs -c -i /tmp/httpd-2.2.32/modules/mappers/mod_rewrite.c
 
 RUN cd /tmp && wget http://ftp.gnu.org/gnu/bison/bison-2.1.tar.gz \
   && tar xzvf bison-2.1.tar.gz \
