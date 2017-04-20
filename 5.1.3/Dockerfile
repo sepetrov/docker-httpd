@@ -77,15 +77,57 @@ RUN ln -s /usr/lib/x86_64-linux-gnu/libpng.so /usr/lib/libpng.so
 RUN cd /tmp && wget "http://museum.php.net/php5/php-$PHP_VERSION.tar.gz" \
   && tar xzvf "php-$PHP_VERSION.tar.gz" \
   && cd "php-$PHP_VERSION" \
-  && ./configure --enable-bcmath --with-xsl --enable-fastcgi --enable-force-cgi-redirect --with-gd --enable-sockets --with-mysql=/usr/ --with-gettext --enable-mbstring --with-xpm-dir=/usr/lib --with-jpeg-dir=/usr/lib/x86_64-linux-gnu/ --with-gdbm=/usr/lib --with-zlib-dir=/usr/lib --with-freetype-dir=/usr/lib --with-iconv=/usr/local/lib --with-xml --with-dom --with-config-file=/etc/php5.ini --with-openssl-dir=/usr/include/openssl --enable-memory-limit --with-pdo-mysql=/usr/ --with-apxs2 --enable-so --without-pear \
+  && ./configure \
+    --enable-bcmath \
+    --with-xsl \
+    --enable-fastcgi \
+    --enable-force-cgi-redirect \
+    --with-gd \
+    --enable-sockets \
+    --with-mysql=/usr/ \
+    --enable-embedded-mysqli \
+    --with-gettext \
+    --enable-mbstring \
+    --with-xpm-dir=/usr/lib \
+    --with-jpeg-dir=/usr/lib/x86_64-linux-gnu/ \
+    --with-gdbm=/usr/lib \
+    --with-zlib-dir=/usr/lib \
+    --with-freetype-dir=/usr/lib \
+    --with-iconv=/usr/local/lib \
+    --with-xml \
+    --with-dom \
+    --with-config-file=/etc/php5.ini \
+    --with-openssl-dir=/usr/include/openssl \
+    --enable-memory-limit \
+    --with-pdo-mysql=/usr/ \
+    --with-apxs2 \
+    --enable-so \
+    --without-pear \
   && make \
   && make install \
   && make clean
 
 COPY ./httpd.conf /usr/local/apache2/conf/httpd.conf
+RUN { \
+    echo '#AddType application/x-http-php .php'; \
+    echo 'AddType application/x-httpd-php .php'; \
+    echo '#<FilesMatch \.php$>'; \
+    echo '\t#SetHandler application/x-httpd-php'; \
+    echo '#</FilesMatch>'; \
+    echo; \
+    echo '#DirectoryIndex disabled'; \
+    echo 'DirectoryIndex index.php index.html'; \
+    echo; \
+    echo '<Directory /usr/local/apache2/htdocs>'; \
+    echo '\tOptions -Indexes'; \
+    echo '\tAllowOverride All'; \
+    echo '</Directory>'; \
+  } | tee /dev/null # -a ${HTTPD_PREFIX}/conf/httpd.conf
 
 COPY ./php.ini /usr/local/lib/php.ini
 
 RUN echo "FromLineOverride=YES" >> /etc/ssmtp/ssmtp.conf
 
 RUN ln -s /usr/local/apache2/htdocs /var/www
+
+RUN echo '<?php phpinfo();' > /var/www/index.php
